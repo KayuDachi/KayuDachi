@@ -1,0 +1,40 @@
+#include <LCD_I2C.h>
+
+LCD_I2C lcd(0x27);  // Initialize LCD
+
+const int piezoPin = A0;   // Analog pin for piezo
+int stepCounter = 0;       // Total step count
+float totalVoltage = 0.0;  // Total voltage generated
+const int threshold = 150; // Value to detect a footstep (adjust this wehn needed)
+
+void setup() {
+  lcd.begin();            // Initialize the LCD
+  lcd.backlight();        // Turn on the LCD backlight
+  lcd.print("Kinetic Flooring");
+  delay(2000);            // Display intro message
+  lcd.clear();
+  lcd.print("Group 9");
+  delay(2000);            // Pause b4 main loop
+  lcd.clear();
+  pinMode(piezoPin, INPUT);  // Set the piezo pin as input
+}
+
+void loop() {
+  int piezoValue = analogRead(piezoPin);   // Read voltage from piezo sensors
+  float voltage = (piezoValue * 5.0) / 1023.0;  // Convert raw value to voltage
+
+  if (piezoValue > threshold) {  // If step is detected
+    stepCounter++;               // Count the step
+    totalVoltage += voltage;     // Add the voltage to the total
+    delay(300);                  // Short delay to prevent multiple counts 
+  }
+
+  // Display: step count and total voltage
+  lcd.clear();
+  lcd.print("Steps: ");
+  lcd.print(stepCounter);        // Total step count
+  lcd.setCursor(0, 1);           // Move to the second line
+  lcd.print("Voltage: ");
+  lcd.print(totalVoltage, 2);    // total voltage
+  delay(100);                    // Short delay before next loop (adjust this when too many fault readings alongside threshold)
+}
